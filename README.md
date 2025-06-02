@@ -1,7 +1,5 @@
 # Emotion-Aware Chatbot for Mental Health Support
 
-![Project Banner](https://via.placeholder.com/800x300?text=Emotion-Aware+Chatbot+for+Mental+Health+Support)
-
 ---
 
 ## 🌟 Introduction
@@ -61,50 +59,46 @@ graph TD
 - Machine Learning Framework: PyTorch
 - Web Interface: Streamlit
 
-Model: Fine-tuned BERT (base-uncased)
+*Model: Fine-tuned BERT (base-uncased)*
 
 🏁 Getting Started
 ✅ Prerequisites
 Python 3.8+
 
-pip package manager
+### pip package manager
 
-💻 Installation
-bash
-Copy
-Edit
+#### 💻 Installation
+```bash 
 git clone https://github.com/your-repo/emotion-chatbot.git
 cd emotion-chatbot
 pip install -r requirements.txt
-▶️ Running the Application
-bash
-Copy
-Edit
+```
+#### ▶️ Running the Application
+```bash 
 streamlit run app.py
-📂 Project Structure
-plaintext
-Copy
-Edit
+``` 
+## 📂 Project Structure
+```plaintext
 emotion-chatbot/
 ├── app.py              # Main application file
 ├── requirements.txt    # Dependency list
 ├── README.md           # This documentation
 └── assets/             # Additional resources
-🌈 Emotion Support Matrix
-Emotion	Example Input	Bot Response
-Anger	"I'm so frustrated with everything!"	"It sounds like you're upset. I'm here to listen. 🧘"
-Fear	"I'm scared about what might happen"	"It's okay to feel afraid. You're not alone. 🤝"
-Joy	"I got the promotion!"	"I'm so happy to hear that! 😊 Keep spreading the joy!"
-Love	"I cherish my partner so much"	"Love is such a beautiful emotion. Cherish it. 💖"
-Sadness	"I've been feeling really down"	"I'm sorry you're feeling down. Things will get better. 🌧️☀️"
+```
 
-🤝 Contributing
-We welcome contributions! Please see our CONTRIBUTING.md (to be added) for details.
+### 🌈 Emotion Support Matrix
+|Emotion    |Example Input	                        |Bot Response                                                     |
+|-----------|---------------------------------------|-----------------------------------------------------------------|
+|Anger	    |"I'm so frustrated with everything!"	|It sounds like you're upset. I'm here to listen. 🧘"             |
+|Fear	    |"I'm scared about what might happen"	|"It's okay to feel afraid. You're not alone. 🤝"                 |
+|Joy	    |"I got the promotion!"    	            |"I'm so happy to hear that! 😊 Keep spreading the joy!"          |
+|Love	    |"I cherish my partner so much"	        |"Love is such a beautiful emotion. Cherish it. 💖"               |
+|Sadness	|"I've been feeling really down"    	|"I'm sorry you're feeling down. Things will get better. 🌧️☀️"    |
 
 📜 License
 This project is licensed under the MIT License – see the LICENSE file for details.
 
 📧 Contact
-For inquiries, please contact: [project team email]
+For inquiries, please contact: iamhamzanawaz14@gmail.com
 
 ⚠️ Disclaimer: This chatbot is not a substitute for professional mental health care. If you're experiencing severe distress, please contact a licensed professional.

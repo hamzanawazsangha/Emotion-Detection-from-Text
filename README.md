@@ -37,6 +37,7 @@ Our fine-tuned BERT model demonstrates exceptional performance:
 ## 🛠️ Technical Implementation
 
 ### Architecture
+
 ```mermaid
 graph TD
     A[User Input] --> B[Emotion Detection]

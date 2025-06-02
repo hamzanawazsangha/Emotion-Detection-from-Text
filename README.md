@@ -55,7 +55,7 @@ graph TD
     C -->|joy| F[Positive Reinforcement]
     C -->|love| G[Affirming Response]
     C -->|sadness| H[Comforting Response]
-
+```
 ## 🧰 Technology Stack
 - Natural Language Processing: Hugging Face Transformers
 - Machine Learning Framework: PyTorch

@@ -36,17 +36,14 @@ Our fine-tuned BERT model demonstrates exceptional performance:
 
 ## 🛠️ Technical Implementation
 
-### Architecture
-
-```mermaid
-graph TD
-    A[User Input] --> B[Emotion Detection]
-    B --> C{Emotion Class}
-    C -->|anger| D[Empathetic Response]
-    C -->|fear| E[Supportive Response]
-    C -->|joy| F[Positive Reinforcement]
-    C -->|love| G[Affirming Response]
-    C -->|sadness| H[Comforting Response]
+### System Architecture
+User Input → Emotion Detection → Response Generation → Output
+│
+├─ Anger → Empathetic Response
+├─ Fear → Supportive Response
+├─ Joy → Positive Reinforcement
+├─ Love → Affirming Response
+└─ Sadness → Comforting Response
 
 Technology Stack
 Natural Language Processing: Hugging Face Transformers

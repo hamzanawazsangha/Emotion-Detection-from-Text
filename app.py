@@ -1,8 +1,14 @@
 import streamlit as st
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import torch.nn.functional as F
 import asyncio
+
+# Fix for asyncio event loop issues
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
 # -------- Page Setup --------
 st.set_page_config(page_title="Emotion Predictor", page_icon="💬", layout="centered")
@@ -22,16 +28,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 @st.cache_resource
 def load_model():
     model_id = "HamzaNawaz17/TextEmotionDetectionModel"
-    tokenizer = BertTokenizer.from_pretrained(model_id)
-    model = BertForSequenceClassification.from_pretrained(model_id)
-    model.to(device)
-    model.eval()
-    return tokenizer, model
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModelForSequenceClassification.from_pretrained(model_id)
+        model.to(device)
+        model.eval()
+        return tokenizer, model
+    except Exception as e:
+        st.error(f"Model loading failed: {str(e)}")
+        return None, None
 
-try:
-    tokenizer, model = load_model()
-except Exception as e:
-    st.error(f"Failed to load model: {str(e)}")
+tokenizer, model = load_model()
+
+if tokenizer is None or model is None:
     st.stop()
 
 # -------- Emotion Labels --------
@@ -49,7 +58,7 @@ def predict_emotion(text):
             confidence = probs[0][predicted].item()
         return emotion_labels[predicted], confidence
     except Exception as e:
-        st.error(f"Error during prediction: {str(e)}")
+        st.error(f"Prediction error: {str(e)}")
         return None, None
 
 # -------- Emotion-Based Responses --------
@@ -64,8 +73,8 @@ response_templates = {
 # -------- UI Elements --------
 st.markdown("### How are you feeling today?")
 user_input = st.text_area(
-    "Enter your message here:", 
-    height=140, 
+    "Enter your message:",
+    height=140,
     placeholder="Type your thoughts here...",
     label_visibility="visible"
 )
@@ -80,7 +89,6 @@ if analyze_button and user_input.strip():
         if emotion and confidence:
             st.success(f"**Emotion:** {emotion.capitalize()} ({confidence * 100:.2f}% confidence)")
             st.info(response_templates.get(emotion, "Thank you for sharing."))
-
 elif analyze_button and not user_input.strip():
     st.warning("Please enter a message to analyze.")
 
@@ -91,9 +99,3 @@ st.markdown("""
         Made with ❤️ using Hugging Face and Streamlit | Optimized for 🖥️ & 📱
     </div>
 """, unsafe_allow_html=True)
-
-# Fix for asyncio event loop issues
-try:
-    asyncio.get_event_loop()
-except RuntimeError:
-    asyncio.set_event_loop(asyncio.new_event_loop())

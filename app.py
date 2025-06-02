@@ -1,62 +1,99 @@
-# app.py
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from transformers import BertTokenizer, BertForSequenceClassification
 import torch
+import torch.nn.functional as F
+import asyncio
 
-# Set page layout
-st.set_page_config(page_title="Emotion Detection", layout="centered")
+# -------- Page Setup --------
+st.set_page_config(page_title="Emotion Predictor", page_icon="💬", layout="centered")
 
-# Sidebar info
-with st.sidebar:
-    st.header("📘 Model Info")
-    st.markdown("""
-    - **Model:** `HamzaNawaz17/TextEmotionDetectionModel`
-    - **Base:** BERT-based Transformer
-    - **Trained for:** Text Emotion Classification
-    - **Accuracy:** ~94%
-    """)
-    st.markdown("---")
-    st.write("Created with ❤️ using Hugging Face and Streamlit")
+# -------- Title --------
+st.markdown("""
+    <div style="text-align: center;">
+        <h2 style="color: #4B8BBE;">💬 Emotion-Aware Chatbot</h2>
+        <p style="font-size: 1.1rem;">Understand how you're feeling by analyzing your message</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# Main title
-st.title("😊 Emotion Detection from Text")
-st.subheader("Let AI detect how you're feeling!")
+# -------- Device Setup --------
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Text input with placeholder
+# -------- Load Model & Tokenizer from Hugging Face --------
+@st.cache_resource
+def load_model():
+    model_id = "HamzaNawaz17/TextEmotionDetectionModel"
+    tokenizer = BertTokenizer.from_pretrained(model_id)
+    model = BertForSequenceClassification.from_pretrained(model_id)
+    model.to(device)
+    model.eval()
+    return tokenizer, model
+
+try:
+    tokenizer, model = load_model()
+except Exception as e:
+    st.error(f"Failed to load model: {str(e)}")
+    st.stop()
+
+# -------- Emotion Labels --------
+emotion_labels = ['anger', 'fear', 'joy', 'love', 'sadness']
+
+# -------- Prediction Function --------
+def predict_emotion(text):
+    try:
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+        inputs = {key: val.to(device) for key, val in inputs.items()}
+        with torch.no_grad():
+            outputs = model(**inputs)
+            probs = F.softmax(outputs.logits, dim=1)
+            predicted = torch.argmax(probs, dim=1).item()
+            confidence = probs[0][predicted].item()
+        return emotion_labels[predicted], confidence
+    except Exception as e:
+        st.error(f"Error during prediction: {str(e)}")
+        return None, None
+
+# -------- Emotion-Based Responses --------
+response_templates = {
+    'anger': "It sounds like you're upset. I'm here to listen. 🧘",
+    'fear': "It's okay to feel afraid. You're not alone. 🤝",
+    'joy': "I'm so happy to hear that! 😊 Keep spreading the joy!",
+    'love': "Love is such a beautiful emotion. Cherish it. 💖",
+    'sadness': "I'm sorry you're feeling down. Things will get better. 🌧️☀️"
+}
+
+# -------- UI Elements --------
+st.markdown("### How are you feeling today?")
 user_input = st.text_area(
-    "Your Message ✍️", 
-    placeholder="e.g., I'm feeling really excited about my day!",
+    "Enter your message here:", 
+    height=140, 
+    placeholder="Type your thoughts here...",
     label_visibility="visible"
 )
 
-# Load model only once
-@st.cache_resource
-def load_pipeline():
-    tokenizer = AutoTokenizer.from_pretrained("HamzaNawaz17/TextEmotionDetectionModel")
-    model = AutoModelForSequenceClassification.from_pretrained("HamzaNawaz17/TextEmotionDetectionModel")
-    return pipeline("text-classification", model=model, tokenizer=tokenizer)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    analyze_button = st.button("🔍 Analyze Emotion")
 
-# Emoji mapping
-EMOJI_MAP = {
-    "joy": "😄",
-    "sadness": "😢",
-    "anger": "😠",
-    "fear": "😨",
-    "love": "❤️",
-    "surprise": "😲",
-    "neutral": "😐"
-}
+if analyze_button and user_input.strip():
+    with st.spinner("Analyzing..."):
+        emotion, confidence = predict_emotion(user_input)
+        if emotion and confidence:
+            st.success(f"**Emotion:** {emotion.capitalize()} ({confidence * 100:.2f}% confidence)")
+            st.info(response_templates.get(emotion, "Thank you for sharing."))
 
-# Predict button
-if user_input:
-    with st.spinner("Analyzing your emotion..."):
-        classifier = load_pipeline()
-        result = classifier(user_input)[0]
-        label = result['label'].lower()
-        emoji = EMOJI_MAP.get(label, "🔍")
-        score = result['score']
-        st.markdown(f"### {emoji} **{label.capitalize()}**  \nConfidence: `{score:.2f}`")
+elif analyze_button and not user_input.strip():
+    st.warning("Please enter a message to analyze.")
 
-# Footer
-st.markdown("---")
-st.caption("Powered by 🤗 Hugging Face | Deployed on 🌐 Streamlit Cloud")
+# -------- Footer --------
+st.markdown("""
+    <hr style="margin-top: 2rem;">
+    <div style='text-align: center; font-size: 0.9rem;'>
+        Made with ❤️ using Hugging Face and Streamlit | Optimized for 🖥️ & 📱
+    </div>
+""", unsafe_allow_html=True)
+
+# Fix for asyncio event loop issues
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
